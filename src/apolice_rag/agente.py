@@ -88,14 +88,14 @@ PROMPT_REFORMULAR = ChatPromptTemplate.from_messages([
 ])
 
 
-def extrair_com_agente(conn, documento: str, k: int = 4) -> dict:
+def extrair_com_agente(conn, documento: str, k: int = 4, campos: list[str] | None = None) -> dict:
     from langchain_ollama import ChatOllama
 
     from . import config
     from .busca import buscar
     from .indice import paginas_do_documento
 
-    llm = ChatOllama(model=config.modelo_llm(), base_url=config.ollama_url(), temperature=0)
+    llm = ChatOllama(model=config.modelo_llm(), base_url=config.ollama_url(), temperature=0, num_ctx=8192)
     cadeia_extrair = _modelo()
     cadeia_reformular = PROMPT_REFORMULAR | llm
 
@@ -109,6 +109,8 @@ def extrair_com_agente(conn, documento: str, k: int = 4) -> dict:
 
     ficha = {}
     for campo, (pergunta, instrucao) in CAMPOS.items():
+        if campos and campo not in campos:
+            continue
         final = grafo.invoke({"campo": campo, "instrucao": instrucao, "pergunta": pergunta})
         ficha[campo] = {
             "valor": final["resposta"].valor,

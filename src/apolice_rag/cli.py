@@ -36,6 +36,7 @@ def main() -> None:
     p = sub.add_parser("extrair", help="extrai a ficha da apólice")
     p.add_argument("documento")
     p.add_argument("--agente", action="store_true", help="usa o grafo LangGraph com reformulação da busca")
+    p.add_argument("--campo", action="append", help="extrai só este campo (pode repetir)")
 
     p = sub.add_parser("avaliar", help="recall@k dos três modos de busca")
     p.add_argument("gabarito")
@@ -56,7 +57,7 @@ def main() -> None:
                 print(f"\n[p. {r.pagina}] nota {r.nota:.4f} via {', '.join(r.origem)}\n{r.conteudo}")
         elif args.comando == "extrair":
             funcao = extrair_com_agente if args.agente else extrair
-            print(json.dumps(funcao(conn, args.documento), ensure_ascii=False, indent=2))
+            print(json.dumps(funcao(conn, args.documento, campos=args.campo), ensure_ascii=False, indent=2))
         elif args.comando == "avaliar":
             print(json.dumps(avaliar(conn, args.gabarito, k=args.k), ensure_ascii=False, indent=2))
 
