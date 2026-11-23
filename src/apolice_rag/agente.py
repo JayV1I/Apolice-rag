@@ -95,7 +95,7 @@ def extrair_com_agente(conn, documento: str, k: int = 4, campos: list[str] | Non
     from .busca import buscar
     from .indice import paginas_do_documento
 
-    llm = ChatOllama(model=config.modelo_llm(), base_url=config.ollama_url(), temperature=0, num_ctx=8192)
+    llm = ChatOllama(model=config.modelo_llm(), base_url=config.ollama_url(), temperature=0, num_ctx=4096)
     cadeia_extrair = _modelo()
     cadeia_reformular = PROMPT_REFORMULAR | llm
 

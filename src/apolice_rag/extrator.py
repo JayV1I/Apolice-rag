@@ -54,7 +54,7 @@ PROMPT = ChatPromptTemplate.from_messages([
 
 def _modelo():
     # num_ctx explícito: com o contexto padrão do Ollama o começo do prompt (as instruções) pode ser cortado
-    llm = ChatOllama(model=config.modelo_llm(), base_url=config.ollama_url(), temperature=0, num_ctx=8192)
+    llm = ChatOllama(model=config.modelo_llm(), base_url=config.ollama_url(), temperature=0, num_ctx=4096)
     return PROMPT | llm.with_structured_output(Resposta, method="json_schema")
 
 
