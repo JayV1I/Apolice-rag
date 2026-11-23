@@ -1,6 +1,6 @@
 # apolice-rag
 
-Extração de dados de apólices de seguro de carga em PDF com **RAG híbrido** (busca por palavra-chave + busca vetorial, fundidas com RRF) e **LLM local** via Ollama.
+Extração de dados de apólices de seguro de carga em PDF com **RAG híbrido** (busca por palavra-chave + busca vetorial, fundidas com RRF), **LLM local** via Ollama e um **agente LangGraph** que se autocorrige quando a resposta não confere com o documento.
 
 > Todas as apólices, seguradoras, transportadoras, CNPJs e valores deste repositório são **fictícios**, gerados por `scripts/gerar_apolices_ficticias.py`.
 
@@ -32,6 +32,7 @@ pergunta ──> busca vetorial + busca lexical ──> RRF (k=60) ──> top-k
 | `busca.py` | Busca lexical (`ts_rank_cd`), vetorial (`<=>`) e híbrida |
 | `fusao.py` | Reciprocal Rank Fusion |
 | `extrator.py` | LangChain + `ChatOllama.with_structured_output` (Pydantic) campo a campo |
+| `agente.py` | Grafo LangGraph: quando o trecho não confere no PDF, reformula a busca e tenta de novo |
 | `grounding.py` | Confere se o trecho citado pelo modelo está mesmo no PDF; corrige a página se o modelo errou |
 | `avaliacao.py` | recall@k de cada modo de busca contra um gabarito |
 | `mcp_server.py` | Expõe as ferramentas via MCP para qualquer cliente compatível |
@@ -39,6 +40,18 @@ pergunta ──> busca vetorial + busca lexical ──> RRF (k=60) ──> top-k
 ### Por que o grounding
 
 O modelo pode inventar um valor plausível. Cada campo extraído volta com `fonte.confere`: `true` só se o trecho literal (ou 80% das palavras relevantes) aparece na página. Campo sem fonte que confere não deve ser usado sem revisão humana.
+
+### Agente com autocorreção (LangGraph)
+
+`extrair --agente` roda cada campo por um grafo com loop:
+
+```
+buscar -> extrair -> verificar --(confere)--> fim
+   ^                    |
+   +--- reformular <----+  (trecho não confere ou campo vazio, até 3 tentativas)
+```
+
+Se o LLM citou um trecho que não existe no PDF, o agente pede uma nova consulta de busca com outros termos e tenta de novo. Cada campo volta com o histórico de tentativas (pergunta usada, valor, se conferiu), para auditoria. As funções de busca, extração e reformulação entram por parâmetro, então o fluxo do grafo é testado sem LLM e sem banco (`tests/test_agente.py`).
 
 ## Como rodar
 
@@ -57,6 +70,7 @@ docker compose run --rm app init
 docker compose run --rm app indexar "dados/apolices/*.pdf"
 docker compose run --rm app buscar apolice_atlantica "a apólice cobre roubo de carga?" --modo hibrido
 docker compose run --rm app extrair apolice_atlantica
+docker compose run --rm app extrair apolice_atlantica --agente
 docker compose run --rm app avaliar avaliacao/gabarito_busca.json
 ```
 
@@ -96,7 +110,7 @@ pytest
 }
 ```
 
-Ferramentas: `listar_apolices`, `buscar_trechos`, `extrair_ficha`.
+Ferramentas: `listar_apolices`, `buscar_trechos`, `extrair_ficha`, `extrair_ficha_com_agente`.
 
 ## Comparando os modos de busca
 
@@ -115,7 +129,6 @@ A busca por palavra-chave perde os sinônimos ("subtração da mercadoria", "ass
 ## Próximos passos
 
 - Reranker (cross-encoder) depois da fusão
-- Fluxo com LangGraph: buscar, extrair, verificar e, se o grounding falhar, reformular a pergunta e buscar de novo
 - Avaliação da extração (não só da busca) contra uma ficha esperada por apólice
 - API HTTP (FastAPI) para upload de PDF
 

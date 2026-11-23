@@ -5,6 +5,7 @@ consultar as apólices indexadas. Rodar: `python -m apolice_rag.mcp_server`.
 """
 from mcp.server.mcpserver import MCPServer
 
+from .agente import extrair_com_agente
 from .busca import buscar
 from .extrator import extrair
 from .indice import conectar
@@ -32,6 +33,14 @@ def extrair_ficha(documento: str) -> dict:
     """Extrai a ficha da apólice, com página e trecho de cada campo conferidos no PDF."""
     with conectar() as conn:
         return extrair(conn, documento)
+
+
+
+@mcp.tool()
+def extrair_ficha_com_agente(documento: str) -> dict:
+    """Como extrair_ficha, mas reformula a busca e tenta de novo quando o trecho não confere no PDF."""
+    with conectar() as conn:
+        return extrair_com_agente(conn, documento)
 
 
 if __name__ == "__main__":
