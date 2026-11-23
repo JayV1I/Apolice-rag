@@ -1,0 +1,12 @@
+[project]
+name = "apolice-rag"
+version = "0.1.0"
+description = "Extração de apólices de seguro de carga com RAG híbrido (pgvector + full-text) e LLM local"
+requires-python = ">=3.11"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

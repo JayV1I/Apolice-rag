@@ -1,0 +1,17 @@
+[
+  {"documento": "apolice_horizonte", "pergunta": "a apólice cobre roubo de carga?", "deve_conter": "roubo de carga"},
+  {"documento": "apolice_atlantica", "pergunta": "a apólice cobre roubo de carga?", "deve_conter": "subtração da mercadoria"},
+  {"documento": "apolice_vale_verde", "pergunta": "a apólice cobre roubo de carga?", "deve_conter": "assalto à mão armada"},
+  {"documento": "apolice_horizonte", "pergunta": "qual o limite máximo de garantia por veículo?", "deve_conter": "R$ 500.000,00"},
+  {"documento": "apolice_atlantica", "pergunta": "qual o limite máximo de garantia por veículo?", "deve_conter": "R$ 800.000,00"},
+  {"documento": "apolice_vale_verde", "pergunta": "qual o limite máximo de garantia por veículo?", "deve_conter": "R$ 1.200.000,00"},
+  {"documento": "apolice_horizonte", "pergunta": "em que horário é proibido circular?", "deve_conter": "22h00 e 05h00"},
+  {"documento": "apolice_atlantica", "pergunta": "em que horário é proibido circular?", "deve_conter": "das 23h às 06h"},
+  {"documento": "apolice_vale_verde", "pergunta": "em que horário é proibido circular?", "deve_conter": "entre 21h e 05h"},
+  {"documento": "apolice_horizonte", "pergunta": "quais mercadorias não têm cobertura?", "deve_conter": "cigarros"},
+  {"documento": "apolice_atlantica", "pergunta": "quais mercadorias não têm cobertura?", "deve_conter": "medicamentos controlados"},
+  {"documento": "apolice_vale_verde", "pergunta": "quais mercadorias não têm cobertura?", "deve_conter": "defensivos agrícolas"},
+  {"documento": "apolice_horizonte", "pergunta": "quando é exigida escolta?", "deve_conter": "escolta armada"},
+  {"documento": "apolice_atlantica", "pergunta": "quando é exigida isca eletrônica?", "deve_conter": "isca eletrônica"},
+  {"documento": "apolice_vale_verde", "pergunta": "quando é exigida escolta?", "deve_conter": "escolta"}
+]
