@@ -17,9 +17,13 @@ from .indice import paginas_do_documento
 
 class Resposta(BaseModel):
     # A ordem importa: o modelo gera primeiro a evidência (trecho e página) e só depois o valor.
-    trecho: str | None = Field(None, description="Cópia literal e curta (até 150 caracteres) do texto que comprova o valor")
-    pagina: int | None = Field(None, description="Número da página de onde o trecho saiu")
-    valor: str | None = Field(None, description="Valor do campo, tirado do trecho acima")
+    # Campos obrigatórios e sem null: com "texto ou null" modelos pequenos escolhem null por preguiça.
+    trecho: str = Field(description="Cópia literal e curta (até 150 caracteres) do texto que comprova o valor; vazio se não houver")
+    pagina: int = Field(description="Número da página de onde o trecho saiu; 0 se não houver")
+    valor: str = Field(description="Valor do campo em texto simples, tirado do trecho acima; vazio se não houver")
+
+
+VAZIA = Resposta(trecho="", pagina=0, valor="")
 
 
 # campo -> (pergunta usada na busca, instrução para o modelo)
@@ -47,7 +51,7 @@ PROMPT = ChatPromptTemplate.from_messages([
      "Use SOMENTE os trechos fornecidos. Apólices de seguradoras diferentes usam nomes diferentes "
      "para a mesma coisa, então aceite sinônimos. "
      "Primeiro copie em 'trecho' o pedaço literal do texto que responde ao campo, depois a página, depois o valor. "
-     "Só devolva tudo null se nenhum trecho tratar do assunto. Nunca invente valores, datas ou números."),
+     "Só deixe os campos vazios se nenhum trecho tratar do assunto. Nunca invente valores, datas ou números."),
     ("human", "Campo: {instrucao}\n\nTrechos da apólice:\n{contexto}"),
 ])
 
@@ -74,6 +78,6 @@ def extrair(conn, documento: str, k: int = 4, campos: list[str] | None = None) -
             ficha[campo] = {"valor": None, "fonte": None}
             continue
         resposta: Resposta = cadeia.invoke({"instrucao": instrucao, "contexto": _contexto(resultados)})
-        fonte = verificar(paginas, resposta.pagina, resposta.trecho) if resposta.valor else None
-        ficha[campo] = {"valor": resposta.valor, "fonte": fonte}
+        fonte = verificar(paginas, resposta.pagina, resposta.trecho) if resposta.valor and resposta.trecho else None
+        ficha[campo] = {"valor": resposta.valor or None, "fonte": fonte}
     return ficha

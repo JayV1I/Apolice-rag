@@ -16,7 +16,7 @@ from typing import Callable, TypedDict
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import END, StateGraph
 
-from .extrator import CAMPOS, Resposta, _contexto, _modelo
+from .extrator import CAMPOS, VAZIA, Resposta, _contexto, _modelo
 from .grounding import verificar
 
 MAX_TENTATIVAS = 3
@@ -47,13 +47,13 @@ def montar_grafo(
 
     def no_extrair(e: Estado) -> Estado:
         if not e["resultados"]:
-            return {"resposta": Resposta()}
+            return {"resposta": VAZIA}
         return {"resposta": extrair_fn(e["instrucao"], _contexto(e["resultados"]))}
 
     def no_verificar(e: Estado) -> Estado:
         r = e["resposta"]
         fonte = verificar(paginas, r.pagina, r.trecho) if r.valor and r.trecho else None
-        registro = {"tentativa": e["tentativa"], "pergunta": e["pergunta"], "valor": r.valor,
+        registro = {"tentativa": e["tentativa"], "pergunta": e["pergunta"], "valor": r.valor or None,
                     "confere": bool(fonte and fonte["confere"])}
         return {"fonte": fonte, "historico": e.get("historico", []) + [registro]}
 
@@ -113,7 +113,7 @@ def extrair_com_agente(conn, documento: str, k: int = 4, campos: list[str] | Non
             continue
         final = grafo.invoke({"campo": campo, "instrucao": instrucao, "pergunta": pergunta})
         ficha[campo] = {
-            "valor": final["resposta"].valor,
+            "valor": final["resposta"].valor or None,
             "fonte": final["fonte"],
             "tentativas": final["historico"],
         }

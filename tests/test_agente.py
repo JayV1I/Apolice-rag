@@ -2,7 +2,7 @@
 from types import SimpleNamespace
 
 from apolice_rag.agente import montar_grafo
-from apolice_rag.extrator import Resposta
+from apolice_rag.extrator import VAZIA, Resposta
 
 PAGINAS = ["Item 2. Garante-se a indenização pela subtração da mercadoria mediante grave ameaça."]
 TRECHO = SimpleNamespace(pagina=1, conteudo=PAGINAS[0])
@@ -38,6 +38,6 @@ def test_reformula_quando_trecho_inventado():
 
 
 def test_desiste_no_limite_de_tentativas():
-    final, perguntas = _rodar(lambda i, c: Resposta(), max_tentativas=2)
+    final, perguntas = _rodar(lambda i, c: VAZIA, max_tentativas=2)
     assert len(perguntas) == 2
-    assert final["resposta"].valor is None
+    assert final["resposta"].valor == ""
